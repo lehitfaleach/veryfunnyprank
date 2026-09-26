@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>bit</title>
+
+  <!-- PWA Settings -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="bit">
+  <meta name="theme-color" content="#12151a">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Assistant', 'Rubik', -apple-system, BlinkMacSystemFont, sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #0b0d10;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .app-frame {
+      width: 100%;
+      max-width: 414px;
+      height: 100vh;
+      max-height: 844px;
+      background-color: #12151a;
+      border-radius: 36px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 10px #1f232b;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    @media (max-width: 450px) {
+      body {
+        background-color: #12151a;
+      }
+      .app-frame {
+        max-width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+
+    .top-status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 22px 4px 22px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      color: #ffffff;
+      z-index: 10;
+      flex-shrink: 0;
+    }
+
+    .top-status-bar .left-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .top-status-bar .right-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .moon-icon {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    /* Container עם גלילה ללא פס גלילה ויזואלי */
+    .container {
+      flex: 1;
+      padding: 6px 16px 24px 16px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE/Edge */
+    }
+
+    .container::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+
+    .balance-section {
+      text-align: center;
+      margin-top: 10px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
+      align-self: center;
+      padding: 6px 16px;
+      border-radius: 16px;
+      transition: background-color 0.15s ease;
+    }
+
+    .balance-section:active {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .balance-title {
+      color: #939aa8;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 2px;
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .edit-hint {
+      font-size: 11px;
+      background: #282d38;
+      color: #a0a7b5;
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+
+    .balance-amount {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      direction: ltr;
+      line-height: 1;
+      font-family: 'Assistant', sans-serif;
+    }
+
+    .balance-amount .shekel {
+      font-size: 24px;
+      font-weight: 500;
+      margin-right: 2px;
+      transform: translateY(-2px);
+    }
+
+    .balance-amount .integer {
+      font-size: 52px;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+    }
+
+    .balance-amount .decimal {
+      font-size: 24px;
+      font-weight: 500;
+      letter-spacing: -0.3px;
+    }
+
+    .actions-grid {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      margin-bottom: 22px;
+      padding: 0 4px;
+    }
+
+    .action-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .action-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: transform 0.12s ease;
+    }
+
+    .action-btn:active {
+      transform: scale(0.92);
+    }
+
+    .action-btn.transfer { background-color: #ff3b6b; }
+    .action-btn.group { background-color: #5edbf2; }
+    .action-btn.add { background-color: #cbeb34; }
+    .action-btn.more { background-color: #2b303a; }
+
+    .action-btn svg {
+      width: 28px;
+      height: 28px;
+      fill: none;
+      stroke: #12151a;
+      stroke-width: 2.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .action-btn.transfer svg {
+      stroke: rgba(255, 255, 255, 0.7);
+      stroke-width: 2.5;
+    }
+
+    .action-btn.add svg {
+      stroke-width: 2;
+    }
+
+    .action-btn.group svg {
+      stroke-width: 1.6;
+    }
+
+    .action-btn.more svg {
+      stroke: #ffffff;
+    }
+
+    .action-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #e1e4ea;
+    }
+
+    .activity-card {
+      background-color: #1e222b;
+      border-radius: 20px;
+      padding: 16px 14px;
+      margin-bottom: 16px;
+    }
+
+    .activity-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .activity-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #9ba3b0;
+    }
+
+    .search-btn {
+      background: none;
+      border: none;
+      color: #9ba3b0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      border-radius: 12px;
+      padding: 4px;
+      transition: background-color 0.12s ease;
+    }
+
+    .activity-item:active {
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    .item-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .avatar.green { background-color: #8ce13f; }
+    .avatar.purple { background-color: #4b36e3; }
+    .avatar.cyan { background-color: #5edbf2; }
+    .avatar.orange { background-color: #ff9f43; }
+
+    .avatar-face {
+      width: 21px;
+      height: 21px;
+    }
+
+    .item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .item-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .item-sub {
+      font-size: 12px;
+      color: #8a92a1;
+      font-weight: 500;
+    }
+
+    .item-date {
+      font-size: 11px;
+      color: #8a92a1;
+      font-weight: 500;
+    }
+
+    .item-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin: 0;
+      padding: 0;
+    }
+
+    .badge.minus { background-color: #ff3b6b; }
+    .badge.down { background-color: #4b36e3; }
+    .badge.plus { background-color: #00bcd4; }
+
+    .badge svg {
+      display: block;
+      width: 8px;
+      height: 8px;
+    }
+
+    .item-amount {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      direction: ltr;
+    }
+
+    .show-more {
+      text-align: center;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 18px;
+      padding-top: 2px;
+      cursor: pointer;
+    }
+
+    .tiles-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .tile {
+      background-color: #1e222b;
+      border-radius: 14px;
+      padding: 12px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .tile-icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    .tile-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .tile-subtitle {
+      font-size: 11px;
+      color: #8a92a1;
+      font-weight: 500;
+      margin-top: -2px;
+    }
+
+    /* Most Active Section */
+    .most-active-card {
+      background-color: #1e222b;
+      border-radius: 20px;
+      padding: 16px 14px;
+      margin-bottom: 12px;
+    }
+
+    .most-active-grid {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 6px 0 2px 0;
+    }
+
+    .active-user-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      width: 30%;
+    }
+
+    .active-user-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.12s ease;
+    }
+
+    .active-user-avatar:active {
+      transform: scale(0.92);
+    }
+
+    .active-user-avatar .avatar-face {
+      width: 28px;
+      height: 28px;
+    }
+
+    .active-user-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .nav-bar {
+      height: 64px;
+      background-color: #1a1e26;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid #242934;
+      z-index: 50;
+      flex-shrink: 0;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: #717885;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      width: 33%;
+    }
+
+    .nav-item.active {
+      color: #ffffff;
+    }
+
+    .nav-icon-container {
+      width: 48px;
+      height: 28px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-item.active .nav-icon-container {
+      background-color: #2b303d;
+    }
+
+    .modal {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 16px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: #1e222b;
+      border-radius: 24px;
+      padding: 22px 18px;
+      width: 100%;
+      max-width: 350px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      color: #8a92a1;
+      font-weight: 600;
+    }
+
+    .modal input, .modal select {
+      background-color: #12151a;
+      border: 1px solid #2e333d;
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      outline: none;
+      direction: rtl;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .btn-submit { background-color: #ff3b6b; color: #fff; }
+    .btn-cancel { background-color: #2c303a; color: #fff; }
+    .btn-delete { background-color: #d32f2f; color: #fff; }
+
+    .success-screen {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background-color: #12151a;
+      z-index: 300;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 40px 24px 30px;
+      text-align: center;
+    }
+
+    .success-screen.active {
+      display: flex;
+    }
+
+    .success-icon-wrapper {
+      width: 86px;
+      height: 86px;
+      background-color: #8ce13f;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 16px auto 20px auto;
+    }
+
+    .success-icon-wrapper svg {
+      width: 46px;
+      height: 46px;
+      stroke: #12151a;
+      stroke-width: 3.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .success-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .success-subtitle {
+      font-size: 15px;
+      color: #8a92a1;
+      margin-bottom: 24px;
+    }
+
+    .success-details {
+      background-color: #1e222b;
+      width: 100%;
+      border-radius: 20px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+
+    .detail-label { color: #8a92a1; }
+    .detail-value { font-weight: 700; color: #ffffff; }
+
+    .done-btn {
+      width: 100%;
+      background-color: #ff3b6b;
+      color: #fff;
+      padding: 16px;
+      border-radius: 16px;
+      border: none;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-frame">
+    <!-- Top Status Bar -->
+    <div class="top-status-bar">
+      <div class="left-status">
+        <span id="clockTime">11:47</span>
+        <svg class="moon-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </div>
+      <div class="right-status">
+        <!-- Cellular Signal Bars -->
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor">
+          <rect x="1" y="9" width="2" height="3" rx="0.5"/>
+          <rect x="5" y="6" width="2" height="6" rx="0.5"/>
+          <rect x="9" y="3" width="2" height="9" rx="0.5"/>
+          <rect x="13" y="0" width="2" height="12" rx="0.5"/>
+        </svg>
+        <!-- Wi-Fi Icon -->
+        <svg width="16" height="12" viewBox="0 0 20 14" fill="currentColor">
+          <path d="M12 1.5C15.42 1.5 18.52 2.89 20.76 5.13l-2.12 2.12C17.06 5.67 14.65 4.7 12 4.7c-2.65 0-5.06.97-6.64 2.55L3.24 5.13C5.48 2.89 8.58 1.5 12 1.5zm0 5.6c2.09 0 3.98.85 5.36 2.23l-2.12 2.12c-.83-.83-1.97-1.35-3.24-1.35s-2.41.52-3.24 1.35L6.64 9.33C8.02 7.95 9.91 7.1 12 7.1zm0 5.6c.94 0 1.79.38 2.41 1l-2.41 2.41L9.59 13.7c.62-.62 1.47-1 2.41-1z"/>
+        </svg>
+        <span style="font-size: 12px; font-weight: 700;">100%</span>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Balance Section -->
+      <div class="balance-section" onclick="openBalanceModal()" title="לחץ לעריכת היתרה">
+        <div class="balance-title">
+          היתרה שלך
+          <span class="edit-hint">שינוי</span>
+        </div>
+        <div class="balance-amount" id="balanceDisplay">
+          <span class="shekel">₪</span><span class="integer" id="balInt">0</span><span class="decimal" id="balDec">.67</span>
+        </div>
+      </div>
+
+      <!-- Main Action Buttons -->
+      <div class="actions-grid">
+        <div class="action-item" onclick="openTransferModal()">
+          <div class="action-btn transfer">
+            <svg viewBox="0 0 24 24"><path d="M5 19L19 5M19 5H8M19 5V16"/></svg>
+          </div>
+          <span class="action-label">העברה</span>
+        </div>
+
+        <div class="action-item" onclick="openAddModal()">
+          <div class="action-btn group">
+            <svg viewBox="0 0 24 24"><circle cx="6.5" cy="6.5" r="3.2"/><circle cx="17.5" cy="6.5" r="3.2"/><circle cx="6.5" cy="17.5" r="3.2"/><circle cx="17.5" cy="17.5" r="3.2"/></svg>
+          </div>
+          <span class="action-label">קבוצה</span>
+        </div>
+
+        <div class="action-item" onclick="openAddModal()">
+          <div class="action-btn add">
+            <svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg>
+          </div>
+          <span class="action-label">הוספה</span>
+        </div>
+
+        <div class="action-item" onclick="openAddModal()">
+          <div class="action-btn more">
+            <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg>
+          </div>
+          <span class="action-label">עוד</span>
+        </div>
+      </div>
+
+      <!-- Activity Section -->
+      <div class="activity-card">
+        <div class="activity-header">
+          <span class="activity-title">פעילות אחרונה</span>
+          <button type="button" class="search-btn" onclick="openAddModal()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </button>
+        </div>
+
+        <div class="activity-list" id="activityList"></div>
+
+        <div class="show-more" onclick="openAddModal()">+ תראו לי עוד</div>
+      </div>
+
+      <!-- Feature Tiles -->
+      <div class="tiles-row">
+        <div class="tile">
+          <!-- Outline Plane facing top-left showing both wings -->
+          <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="#ff3b6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3l7.5 15.5 2.5-5.5 5.5-2.5L3 3z"/>
+            <path d="M13 13l5.5 5.5"/>
+          </svg>
+          <span class="tile-title">מט"ח<br>בטרמינל</span>
+        </div>
+
+        <div class="tile">
+          <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="#ff3b6b" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="tile-title">תרומה<br>לחלאסרטן</span>
+        </div>
+
+        <div class="tile">
+          <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="#ffb703" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+          <span class="tile-title">פיקדון יומי</span>
+          <span class="tile-subtitle">2% ריבית</span>
+        </div>
+      </div>
+
+      <!-- Most Active Section -->
+      <div class="most-active-card">
+        <div class="activity-header">
+          <span class="activity-title">הכי פעילים אצליך</span>
+        </div>
+        <div class="most-active-grid">
+          <!-- Person 1 -->
+          <div class="active-user-item" onclick="openEditActiveUserModal(0)">
+            <div class="active-user-avatar avatar green">
+              <svg class="avatar-face" viewBox="0 0 36 36">
+                <path stroke="#12151a" stroke-width="2.8" stroke-linecap="round" fill="none" d="M10 14c1.5-2 3.5-2 5 0" />
+                <path stroke="#12151a" stroke-width="2.8" stroke-linecap="round" fill="none" d="M21 14c1.5-2 3.5-2 5 0" />
+                <path stroke="#12151a" stroke-width="2.8" stroke-linecap="round" fill="none" d="M12 21c3 3 9 3 12 0" />
+              </svg>
+            </div>
+            <span class="active-user-name" id="activeUserName0">אלון</span>
+          </div>
+
+          <!-- Person 2 -->
+          <div class="active-user-item" onclick="openEditActiveUserModal(1)">
+            <div class="active-user-avatar avatar cyan">
+              <svg class="avatar-face" viewBox="0 0 36 36">
+                <path stroke="#12151a" stroke-width="2.8" stroke-linecap="round" fill="none" d="M10 13c1.5 1.5 3.5 1.5 5 0" />
+                <path stroke="#12151a" stroke-width="2.8" stroke-linecap="round" fill="none" d="M21 13c1.5 1.5 3.5 1.5 5 0" />
+                <path stroke="#12151a" stroke-width="2.8" stroke-linecap="round" fill="none" d="M12 21c3 3 9 3 12 0" />
+              </svg>
+            </div>
+            <span class="active-user-name" id="activeUserName1">אסף</span>
+          </div>
+
+          <!-- Person 3 -->
+          <div class="active-user-item" onclick="openEditActiveUserModal(2)">
+            <div class="active-user-avatar avatar orange">
+              <svg class="avatar-face" viewBox="0 0 36 36">
+                <path stroke="#12151a" stroke-width="2.8" stroke-linecap="round" fill="none" d="M10 14c1.5-2 3.5-2 5 0" />
+                <path stroke="#12151a" stroke-width="2.8" stroke-linecap="round" fill="none" d="M21 14c1.5-2 3.5-2 5 0" />
+                <path stroke="#12151a" stroke-width="2.8" stroke-linecap="round" fill="none" d="M12 21c3 3 9 3 12 0" />
+              </svg>
+            </div>
+            <span class="active-user-name" id="activeUserName2">מאיה</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <div class="nav-bar">
+      <div class="nav-item">
+        <div class="nav-icon-container">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+        </div>
+        <span>פרופיל</span>
+      </div>
+
+      <div class="nav-item">
+        <div class="nav-icon-container">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>
+        </div>
+        <span>כיסים</span>
+      </div>
+
+      <div class="nav-item active">
+        <div class="nav-icon-container">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        </div>
+        <span>ראשי</span>
+      </div>
+    </div>
+
+    <!-- Edit Active User Name Modal -->
+    <div class="modal" id="editActiveUserModal">
+      <div class="modal-content">
+        <div class="modal-title">עריכת שם איש קשר</div>
+        <div class="form-group">
+          <label class="form-label">שם חדש</label>
+          <input type="text" id="inputActiveUserName" placeholder="הכנס שם...">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-submit" onclick="saveActiveUserName()">עדכן שם</button>
+          <button type="button" class="btn btn-cancel" onclick="closeModal('editActiveUserModal')">ביטול</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Balance Modal -->
+    <div class="modal" id="balanceModal">
+      <div class="modal-content">
+        <div class="modal-title">עריכת יתרה בחשבון</div>
+        <div class="form-group">
+          <label class="form-label">סכום היתרה החדש (₪)</label>
+          <input type="number" id="inputBalance" placeholder="לדוגמה: 1250.50" step="0.01">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-submit" onclick="saveBalance()">עדכן יתרה</button>
+          <button type="button" class="btn btn-cancel" onclick="closeModal('balanceModal')">ביטול</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Custom Transaction Modal -->
+    <div class="modal" id="addModal">
+      <div class="modal-content">
+        <div class="modal-title">הוספת פעולה חדשה</div>
+        <div class="form-group">
+          <label class="form-label">שם איש הקשר</label>
+          <input type="text" id="inputName" placeholder="לדוגמה: אלון בליצבלאו">
+        </div>
+        <div class="form-group">
+          <label class="form-label">תיאור / סיבה</label>
+          <input type="text" id="inputDesc" placeholder="לדוגמה: מסיבה משה אלון">
+        </div>
+        <div class="form-group">
+          <label class="form-label">תאריך</label>
+          <input type="text" id="inputDate" placeholder="לדוגמה: אתמול / 14.09.26">
+        </div>
+        <div class="form-group">
+          <label class="form-label">סכום ב-₪</label>
+          <input type="number" id="inputAmount" placeholder="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">סוג הפעולה</label>
+          <select id="inputType">
+            <option value="minus">העברה (אדום -)</option>
+            <option value="plus">קבלה (תכלת +)</option>
+            <option value="down">משיכה (סגול ↓)</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-submit" onclick="addCustomTransaction()">הוסף לפעילות</button>
+          <button type="button" class="btn btn-cancel" onclick="closeModal('addModal')">ביטול</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Transfer Modal -->
+    <div class="modal" id="transferModal">
+      <div class="modal-content">
+        <div class="modal-title">ביצוע העברה חדשה</div>
+        <div class="form-group">
+          <label class="form-label">למי להעביר?</label>
+          <input type="text" id="transferName" placeholder="שם איש הקשר">
+        </div>
+        <div class="form-group">
+          <label class="form-label">עבור מה?</label>
+          <input type="text" id="transferDesc" placeholder="עבור...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">סכום להעברה (₪)</label>
+          <input type="number" id="transferAmount" placeholder="0">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-submit" onclick="executeTransfer()">העבר עכשיו</button>
+          <button type="button" class="btn btn-cancel" onclick="closeModal('transferModal')">ביטול</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit/Delete Transaction Modal -->
+    <div class="modal" id="editItemModal">
+      <div class="modal-content">
+        <div class="modal-title">ניהול פעולה זו</div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-delete" onclick="deleteCurrentTransaction()">מחק פעולה זו</button>
+          <button type="button" class="btn btn-cancel" onclick="closeModal('editItemModal')">סגור</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Screen -->
+    <div class="success-screen" id="successScreen">
+      <div>
+        <div class="success-icon-wrapper">
+          <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <div class="success-title">ההעברה בוצעה בהצלחה!</div>
+        <div class="success-subtitle" id="successSub">העברת ל-אלון בליצבלאו</div>
+      </div>
+
+      <div class="success-details">
+        <div class="detail-row">
+          <span class="detail-label">סכום ההעברה</span>
+          <span class="detail-value" id="successAmount">₪100</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">מטרה</span>
+          <span class="detail-value" id="successDesc">תשלום</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">תאריך ושעה</span>
+          <span class="detail-value" id="successDate">עכשיו</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">סטטוס</span>
+          <span class="detail-value" style="color:#8ce13f;">בוצע</span>
+        </div>
+      </div>
+
+      <button type="button" class="done-btn" onclick="finishTransfer()">סיום</button>
+    </div>
+  </div>
+
+  <script>
+    /* State Data */
+    var userBalance = 0.67;
+    var selectedItemId = null;
+    var pendingTransfer = null;
+    var currentActiveUserIndex = null;
+
+    var activeUserNames = ['אלון', 'אסף', 'מאיה'];
+
+    var transactions = [
+      { id: 1, name: 'אלון בליצבלאו', desc: 'מסיבה משה אלון', date: 'אתמול', amount: 100, type: 'minus', color: 'green', eyeType: 'happy' },
+      { id: 2, name: 'משיכה מהיתרה', desc: 'משיכה לחשבון בנק', date: '14.09.26', amount: 18, type: 'down', color: 'purple', eyeType: 'none' },
+      { id: 3, name: 'אסף זאפאטרון', desc: 'שניצל', date: '14.09.26', amount: 18, type: 'plus', color: 'cyan', eyeType: 'chill' }
+    ];
+
+    /* Helper: Live Clock Update */
+    function updateClock() {
+      var now = new Date();
+      var hours = now.getHours().toString().padStart(2, '0');
+      var mins = now.getMinutes().toString().padStart(2, '0');
+      var clockEl = document.getElementById('clockTime');
+      if (clockEl) clockEl.textContent = hours + ':' + mins;
+    }
+
+    /* Helper: Format Balance */
+    function renderBalance() {
+      var parts = userBalance.toFixed(2).split('.');
+      var intPart = parseInt(parts[0], 10).toLocaleString('en-US');
+      var decPart = '.' + parts[1];
+
+      var intEl = document.getElementById('balInt');
+      var decEl = document.getElementById('balDec');
+      if (intEl) intEl.textContent = intPart;
+      if (decEl) decEl.textContent = decPart;
+    }
+
+    /* Helper: Centered SVG Badges */
+    function getBadgeSvg(type) {
+      if (type === 'down') {
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"/><polyline points="19 13 12 20 5 13"/></svg>';
+      } else if (type === 'plus') {
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+      } else {
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+      }
+    }
+
+    /* Helper: Render Avatar SVG */
+    function getAvatarSvg(type, color, eyeType) {
+      if (type === 'down') {
+        return '<svg class="avatar-face" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>';
+      }
+      var isHappy = (eyeType === 'happy' || color === 'green');
+      var eyeL = isHappy ? 'M10 14c1.5-2 3.5-2 5 0' : 'M10 13c1.5 1.5 3.5 1.5 5 0';
+      var eyeR = isHappy ? 'M21 14c1.5-2 3.5-2 5 0' : 'M21 13c1.5 1.5 3.5 1.5 5 0';
+      return '<svg class="avatar-face" viewBox="0 0 36 36">' +
+        '<path stroke="#12151a" stroke-width="2.8" stroke-linecap="round" fill="none" d="' + eyeL + '" />' +
+        '<path stroke="#12151a" stroke-width="2.8" stroke-linecap="round" fill="none" d="' + eyeR + '" />' +
+        '<path stroke="#12151a" stroke-width="2.8" stroke-linecap="round" fill="none" d="M12 21c3 3 9 3 12 0" />' +
+      '</svg>';
+    }
+
+    /* Render Activity List */
+    function renderList() {
+      var container = document.getElementById('activityList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      transactions.forEach(function(t) {
+        var badgeClass = 'minus';
+        if (t.type === 'down') badgeClass = 'down';
+        if (t.type === 'plus') badgeClass = 'plus';
+
+        var badgeSvg = getBadgeSvg(t.type);
+        var avatarSvg = getAvatarSvg(t.type, t.color, t.eyeType);
+
+        var itemDiv = document.createElement('div');
+        itemDiv.className = 'activity-item';
+        itemDiv.onclick = function() { openEditItemModal(t.id); };
+
+        itemDiv.innerHTML = 
+          '<div class="item-right">' +
+            '<div class="avatar ' + t.color + '">' + avatarSvg + '</div>' +
+            '<div class="item-info">' +
+              '<div class="item-name">' + t.name + '</div>' +
+              '<div class="item-sub">' + t.desc + '</div>' +
+              '<div class="item-date">' + t.date + ' • בוצע</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="item-left">' +
+            '<div class="item-amount">₪' + t.amount.toLocaleString('en-US') + '</div>' +
+            '<div class="badge ' + badgeClass + '">' + badgeSvg + '</div>' +
+          '</div>';
+
+        container.appendChild(itemDiv);
+      });
+    }
+
+    /* Edit Active User Names */
+    window.openEditActiveUserModal = function(index) {
+      currentActiveUserIndex = index;
+      var modal = document.getElementById('editActiveUserModal');
+      var input = document.getElementById('inputActiveUserName');
+      if (input) input.value = activeUserNames[index];
+      if (modal) modal.classList.add('active');
+    };
+
+    window.saveActiveUserName = function() {
+      if (currentActiveUserIndex !== null) {
+        var input = document.getElementById('inputActiveUserName');
+        if (input && input.value.trim() !== '') {
+          activeUserNames[currentActiveUserIndex] = input.value.trim();
+          var nameEl = document.getElementById('activeUserName' + currentActiveUserIndex);
+          if (nameEl) nameEl.textContent = activeUserNames[currentActiveUserIndex];
+        }
+      }
+      closeModal('editActiveUserModal');
+    };
+
+    /* Modal Handlers */
+    window.openBalanceModal = function() {
+      var modal = document.getElementById('balanceModal');
+      var input = document.getElementById('inputBalance');
+      if (input) input.value = userBalance;
+      if (modal) modal.classList.add('active');
+    };
+
+    window.saveBalance = function() {
+      try {
+        var input = document.getElementById('inputBalance');
+        if (input && input.value !== '') {
+          var val = parseFloat(input.value);
+          if (!isNaN(val)) {
+            userBalance = val;
+            renderBalance();
+          }
+        }
+        closeModal('balanceModal');
+      } catch (err) {
+        console.error("Error saving balance:", err);
+      }
+    };
+
+    window.openAddModal = function() {
+      var modal = document.getElementById('addModal');
+      if (modal) modal.classList.add('active');
+    };
+
+    window.openTransferModal = function() {
+      var modal = document.getElementById('transferModal');
+      if (modal) modal.classList.add('active');
+    };
+
+    window.openEditItemModal = function(id) {
+      selectedItemId = id;
+      var modal = document.getElementById('editItemModal');
+      if (modal) modal.classList.add('active');
+    };
+
+    window.deleteCurrentTransaction = function() {
+      try {
+        if (selectedItemId !== null) {
+          transactions = transactions.filter(function(t) { return t.id !== selectedItemId; });
+          renderList();
+          selectedItemId = null;
+        }
+        closeModal('editItemModal');
+      } catch (err) {
+        console.error("Error deleting transaction:", err);
+      }
+    };
+
+    window.closeModal = function(id) {
+      var modal = document.getElementById(id);
+      if (modal) modal.classList.remove('active');
+    };
+
+    window.addCustomTransaction = function() {
+      try {
+        var nameEl = document.getElementById('inputName');
+        var descEl = document.getElementById('inputDesc');
+        var dateEl = document.getElementById('inputDate');
+        var amountEl = document.getElementById('inputAmount');
+        var typeEl = document.getElementById('inputType');
+
+        var name = (nameEl && nameEl.value.trim()) ? nameEl.value.trim() : 'ישראל ישראלי';
+        var desc = (descEl && descEl.value.trim()) ? descEl.value.trim() : 'העברה';
+        var date = (dateEl && dateEl.value.trim()) ? dateEl.value.trim() : 'היום';
+        var rawAmount = amountEl ? parseFloat(amountEl.value) : 50;
+        var amount = isNaN(rawAmount) ? 50 : rawAmount;
+        var type = typeEl ? typeEl.value : 'minus';
+
+        var color = 'green';
+        if (type === 'down') color = 'purple';
+        if (type === 'plus') color = 'cyan';
+
+        if (type === 'minus' || type === 'down') {
+          userBalance = Math.max(0, userBalance - amount);
+        } else if (type === 'plus') {
+          userBalance += amount;
+        }
+        renderBalance();
+
+        transactions.unshift({
+          id: Date.now(),
+          name: name,
+          desc: desc,
+          date: date,
+          amount: amount,
+          type: type,
+          color: color,
+          eyeType: 'happy'
+        });
+
+        renderList();
+        closeModal('addModal');
+
+        if (nameEl) nameEl.value = '';
+        if (descEl) descEl.value = '';
+        if (dateEl) dateEl.value = '';
+        if (amountEl) amountEl.value = '';
+      } catch (err) {
+        console.error("Error adding custom transaction:", err);
+      }
+    };
+
+    window.executeTransfer = function() {
+      try {
+        var nameEl = document.getElementById('transferName');
+        var descEl = document.getElementById('transferDesc');
+        var amountEl = document.getElementById('transferAmount');
+
+        var name = (nameEl && nameEl.value.trim()) ? nameEl.value.trim() : 'ישראל ישראלי';
+        var desc = (descEl && descEl.value.trim()) ? descEl.value.trim() : 'תשלום';
+        var rawAmount = amountEl ? parseFloat(amountEl.value) : 100;
+        var amount = isNaN(rawAmount) ? 100 : rawAmount;
+
+        pendingTransfer = {
+          id: Date.now(),
+          name: name,
+          desc: desc,
+          date: 'עכשיו',
+          amount: amount,
+          type: 'minus',
+          color: 'green',
+          eyeType: 'happy'
+        };
+
+        var successSub = document.getElementById('successSub');
+        var successAmount = document.getElementById('successAmount');
+        var successDesc = document.getElementById('successDesc');
+        var successDate = document.getElementById('successDate');
+
+        if (successSub) successSub.innerText = 'העברת ל-' + name;
+        if (successAmount) successAmount.innerText = '₪' + amount.toLocaleString('en-US');
+        if (successDesc) successDesc.innerText = desc;
+
+        var now = new Date();
+        var timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        if (successDate) successDate.innerText = 'היום, ' + timeStr;
+
+        closeModal('transferModal');
+        var successScreen = document.getElementById('successScreen');
+        if (successScreen) successScreen.classList.add('active');
+      } catch (err) {
+        console.error("Error executing transfer:", err);
+      }
+    };
+
+    window.finishTransfer = function() {
+      try {
+        if (pendingTransfer) {
+          userBalance = Math.max(0, userBalance - pendingTransfer.amount);
+          renderBalance();
+          transactions.unshift(pendingTransfer);
+          renderList();
+          pendingTransfer = null;
+        }
+        var successScreen = document.getElementById('successScreen');
+        if (successScreen) successScreen.classList.remove('active');
+
+        var transferName = document.getElementById('transferName');
+        var transferDesc = document.getElementById('transferDesc');
+        var transferAmount = document.getElementById('transferAmount');
+
+        if (transferName) transferName.value = '';
+        if (transferDesc) transferDesc.value = '';
+        if (transferAmount) transferAmount.value = '';
+      } catch (err) {
+        console.error("Error finishing transfer:", err);
+      }
+    };
+
+    /* Initialize Application */
+    document.addEventListener('DOMContentLoaded', function() {
+      updateClock();
+      renderBalance();
+      renderList();
+      setInterval(updateClock, 30000);
+    });
+
+    // Immediate initial execution
+    updateClock();
+    renderBalance();
+    renderList();
+  </script>
+</body>
+</html>
